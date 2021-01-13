@@ -65,20 +65,12 @@ export default function NetworkGraph() {
             .enter()
             .append("g")
 
-        //draw lines for the links 
-        var link = svg.append("g")
-            .attr("class", "links")
-            .selectAll("line")
-            .data(data.links)
-            .enter().append("line")
-            .attr("stroke-width", 1)
-            .attr('stroke', 'black');
-
         //draw circles for the nodes 
         var circle = node.append('circle')
             .attr("class", "circle")
             .attr("r", d => d.age > 18 ? 10 : 5)
             .attr("fill", d => d.sex === 'F' ? "pink" : 'blue')
+
 
         //Set the node position on a hover event.
         circle.on('mouseover', (event) => {
@@ -125,6 +117,14 @@ export default function NetworkGraph() {
             .text(d => d.name)
 
 
+        //draw lines for the links 
+        var link = svg.append("g")
+            .attr("class", "links")
+            .selectAll("line")
+            .data(data.links)
+            .enter().append("line")
+            .attr("stroke-width", 1)
+            .attr('stroke', 'black');
 
         //add tick instructions: 
         simulation.on("tick", () => {
@@ -163,21 +163,23 @@ export default function NetworkGraph() {
             <svg
                 ref={ref}
                 className='network-graph'
-                width={`${WIDTH}vw`}
-                height={`${HEIGHT}vh`}
+                width={`${WIDTH}px`}
+                height={`${HEIGHT}px`}
             />
             <div style={{
                 position: 'absolute',
                 left: hoveredNode.x,
                 top: hoveredNode.y
             }}>
-                <Paper style={{
-                    padding: 20
-                }}>
-                    <h1>{hoveredNode.name}</h1>
-                    <p>Age: {hoveredNode.age}</p>
-                    <p>Sex: {hoveredNode.sex}</p>
-                </Paper>
+                {hoveredNode.x && hoveredNode.y && (
+                    <Paper style={{
+                        padding: 20
+                    }}>
+                        <h1>{hoveredNode.name}</h1>
+                        <p>Age: {hoveredNode.age}</p>
+                        <p>Sex: {hoveredNode.sex}</p>
+                    </Paper>
+                )}
             </div>
         </>
     )
