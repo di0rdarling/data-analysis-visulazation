@@ -1,40 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import * as d3 from "d3";
 import { Paper } from '@material-ui/core';
+import { generateNetworkData, test } from '../../utils/dataGenerator';
+import { networkGraphLegend } from '../../palette';
 
 
-export default function NetworkGraph() {
+export default function NetworkGraph(props) {
 
-    const WIDTH = 300;
-    const HEIGHT = 300;
+    const WIDTH = 1000;
+    const HEIGHT = 500;
 
     let ref = useRef();
-    let [hoveredNode, setHoveredNode] = useState({
-        name: null,
-        age: null,
-        sex: null,
-        x: null,
-        y: null
-    })
-
-    let [data, setData] = useState({
-        nodes: [
-            { name: "Travis", sex: "M", age: 10 },
-            { name: "Rake", sex: "M", age: 19 },
-            { name: "Diana", sex: "F", age: 9 },
-            { name: "Rachel", sex: "F", age: 35 },
-            { name: "Shawn", sex: "M", age: 25 },
-            { name: "Emerald", sex: "F", age: 1 }
-        ],
-        links: [
-            { source: "Travis", target: "Rake" },
-            { source: "Diana", target: "Rake" },
-            { source: "Diana", target: "Rachel" },
-            { source: "Rachel", target: "Rake" },
-            { source: "Rachel", target: "Shawn" },
-            { source: "Emerald", target: "Rachel" }
-        ]
-    })
+    let { nodes, links, setHoveredNode } = props;
 
     useEffect(() => {
 
@@ -45,11 +22,11 @@ export default function NetworkGraph() {
         //Create a new simulation with the specified nodes data. 
         var simulation = d3.forceSimulation()
             //add nodes
-            .nodes(data.nodes);
+            .nodes(nodes);
 
         //Gravity determines how strongly the nodes push / pull each other.
         //The lower the number, the more spread out the graph will be.
-        const gravity = -100;
+        const gravity = -50;
 
         //Set a charge. This is how attracted the nodes will be to each other. 
         //add a centering force
@@ -61,25 +38,24 @@ export default function NetworkGraph() {
         var node = svg.append("g")
             .attr("class", "node")
             .selectAll("g")
-            .data(data.nodes)
+            .data(nodes)
             .enter()
             .append("g")
 
         //draw circles for the nodes 
         var circle = node.append('circle')
             .attr("class", "circle")
-            .attr("r", d => d.age > 18 ? 10 : 5)
-            .attr("fill", d => d.sex === 'F' ? "pink" : 'blue')
+            .attr("r", 5)
+            .attr("fill", d => d.role === 'head' ? networkGraphLegend.source : networkGraphLegend.target)
 
 
         //Set the node position on a hover event.
         circle.on('mouseover', (event) => {
             let currentTarget = d3.pointer(event, node.node());
-            console.log(event.target.__data__)
             setHoveredNode({
                 name: event.target.__data__.name,
                 age: event.target.__data__.age,
-                sex: event.target.__data__.sex,
+                gender: event.target.__data__.gender,
                 x: currentTarget[0],
                 y: currentTarget[1]
             })
@@ -89,7 +65,7 @@ export default function NetworkGraph() {
             setHoveredNode({
                 name: null,
                 age: null,
-                sex: null,
+                gender: null,
                 x: null,
                 y: null
             })
@@ -121,7 +97,7 @@ export default function NetworkGraph() {
         var link = svg.append("g")
             .attr("class", "links")
             .selectAll("line")
-            .data(data.links)
+            .data(links)
             .enter().append("line")
             .attr("stroke-width", 1)
             .attr('stroke', 'black');
@@ -151,36 +127,20 @@ export default function NetworkGraph() {
 
         //Create the link force 
         //We need the id accessor to use named sources and targets 
-        var link_force = d3.forceLink(data.links)
+        var link_force = d3.forceLink(links)
             .id(function (d) { return d.name; })
 
         simulation.force("links", link_force)
 
     }, [])
+
     return (
-        <>
-            <h2>Network Graph</h2>
-            <svg
-                ref={ref}
-                className='network-graph'
-                width={`${WIDTH}px`}
-                height={`${HEIGHT}px`}
-            />
-            <div style={{
-                position: 'absolute',
-                left: hoveredNode.x,
-                top: hoveredNode.y
-            }}>
-                {hoveredNode.x && hoveredNode.y && (
-                    <Paper style={{
-                        padding: 20
-                    }}>
-                        <h1>{hoveredNode.name}</h1>
-                        <p>Age: {hoveredNode.age}</p>
-                        <p>Sex: {hoveredNode.sex}</p>
-                    </Paper>
-                )}
-            </div>
-        </>
+        <svg
+            ref={ref}
+            className='network-graph'
+            width={`${WIDTH}px`}
+            height={`${HEIGHT}px`}
+        />
+
     )
 }
