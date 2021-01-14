@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import * as d3 from "d3";
-import { Paper } from '@material-ui/core';
-import { generateNetworkData, test } from '../../utils/dataGenerator';
 import { networkGraphLegend } from '../../palette';
 
 
